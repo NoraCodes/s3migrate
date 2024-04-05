@@ -167,7 +167,7 @@ public class S3Migrate {
 			final String toBucketF = toBucket;
 			while (true) {
 				allFromBlobs.stream().parallel().forEach((sm) -> {
-					long seconds = 5;
+					long seconds = 2; // retry waits: 2, 4, 8, 16, 32, 64
 					while (true) {
 						try {
 							BlobAccess acc = from.getBlobAccess(fromBucketF, sm.getName());
@@ -191,6 +191,9 @@ public class S3Migrate {
 							}
 							if (seconds < 60) {
 								seconds *= 2;
+							} else {
+								System.out.println("! Timeout exceeded. Giving up on "+sm.getName()+" after  "+seconds+" seconds...");
+								break;
 							}
 						}
 					}
